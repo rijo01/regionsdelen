@@ -1,0 +1,38 @@
+/* [project]/Desktop/regionsdelen/app/globals.css [app-client] (css) */
+.block {
+  display: block;
+}
+
+.flex {
+  display: flex;
+}
+
+.grid {
+  display: grid;
+}
+
+.hidden {
+  display: none;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+:root {
+  --bg: #f5f4f0;
+  --surface: #fff;
+  --border: #e2e0d8;
+  --text: #1a1a18;
+  --muted: #6b6960;
+  --accent: #1d4ed8;
+  --accent-light: #eff6ff;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: DM Sans, system-ui, sans-serif;
+}
+
+/*# sourceMappingURL=Desktop_regionsdelen_app_globals_06b55g4.css.map*/
