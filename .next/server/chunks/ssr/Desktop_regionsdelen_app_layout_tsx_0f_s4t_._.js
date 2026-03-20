@@ -1,0 +1,3 @@
+module.exports=[30564,a=>{"use strict";var b=a.i(31011);a.s(["default",0,function({children:a}){return(0,b.jsxs)("html",{lang:"sv",children:[(0,b.jsxs)("head",{children:[(0,b.jsx)("link",{rel:"preconnect",href:"https://fonts.googleapis.com"}),(0,b.jsx)("link",{href:"https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap",rel:"stylesheet"})]}),(0,b.jsx)("body",{children:a})]})},"metadata",0,{title:"Regionsdelen — Företagskatalog",description:"Sök bland Sveriges företag"}])},36224,a=>{a.n(a.i(30564))}];
+
+//# sourceMappingURL=Desktop_regionsdelen_app_layout_tsx_0f_s4t_._.js.map

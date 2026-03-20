@@ -14,11 +14,13 @@ interface Company {
   anstkl: string|null; aeant: number|null; poang: number|null
 }
 
+type PartialCompany = Pick<Company, 'kundid'|'cfarnr'|'namn'|'firma'|'orgnummer'|'postort'|'lan'|'branschid'>
+
 function AdminContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<Company[]>([])
+  const [results, setResults] = useState<PartialCompany[]>([])
   const [selected, setSelected] = useState<Company|null>(null)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -27,7 +29,7 @@ function AdminContent() {
 
   const loadById = useCallback(async (id: string) => {
     const { data } = await supabaseAdmin.from('aesamtable').select('*').eq('kundid', id).single()
-    if (data) { setSelected(data); setEditData(data) }
+    if (data) { setSelected(data as Company); setEditData(data as Company) }
   }, [])
 
   useEffect(() => { const id = searchParams.get('id'); if (id) loadById(id) }, [searchParams, loadById])
@@ -39,12 +41,12 @@ function AdminContent() {
       .select('kundid,cfarnr,namn,firma,orgnummer,postort,lan,branschid')
       .or(`namn.ilike.%${q}%,firma.ilike.%${q}%,orgnummer.ilike.%${q}%`)
       .limit(30)
-    setResults(data || []); setLoading(false)
+    setResults((data || []) as PartialCompany[]); setLoading(false)
   }, [])
 
   useEffect(() => { const t = setTimeout(() => search(query), 300); return () => clearTimeout(t) }, [query, search])
 
-  const selectCompany = (c: Company) => { setSelected(c); setEditData(c); router.push(`/admin?id=${c.kundid}`) }
+  const selectCompany = (c: PartialCompany) => { loadById(String(c.kundid)); router.push(`/admin?id=${c.kundid}`) }
 
   const save = async () => {
     if (!selected) return
