@@ -24,20 +24,15 @@ export default function HomePage() {
   const PAGE_SIZE = 50
 
   const search = useCallback(async (q: string, p: number) => {
+    if (!q.trim()) { setCompanies([]); setLoading(false); return }
     setLoading(true)
-    let req = supabase
-      .from('aesamtable')
-      .select('kundid,namn,firma,orgnummer,postort,lan,branschid,webb,infotext')
-      .range(p * PAGE_SIZE, p * PAGE_SIZE + PAGE_SIZE - 1)
-      .order('namn', { ascending: true })
-
-    if (q.trim()) {
-      req = req.or(`namn.ilike.%${q}%,firma.ilike.%${q}%,orgnummer.ilike.%${q}%,postort.ilike.%${q}%`)
-    }
-
-    const { data, error } = await req
+    const { data, error } = await supabase.rpc('search_foretag_regionsdelen', {
+      search_query: q,
+      result_limit: PAGE_SIZE,
+      result_offset: p * PAGE_SIZE
+    })
     if (!error && data) {
-      setCompanies(data)
+      setCompanies(data as Company[])
       setHasMore(data.length === PAGE_SIZE)
     }
     setLoading(false)
@@ -48,7 +43,7 @@ export default function HomePage() {
     return () => clearTimeout(t)
   }, [query, search])
 
-  useEffect(() => { search(query, page) }, [page])
+  useEffect(() => { if (query.trim()) search(query, page) }, [page])
 
   const name = (c: Company) => c.namn || c.firma || '(inget namn)'
 
@@ -78,14 +73,11 @@ export default function HomePage() {
         </div>
       </div>
       <div style={{maxWidth:1200,margin:'0 auto',padding:'24px'}}>
-        {loading ? <div style={{textAlign:'center',padding:60,color:'var(--muted)'}}>Laddar...</div> : (
+        {!query && <div style={{textAlign:'center',padding:60,color:'var(--muted)'}}>Börja söka för att hitta företag</div>}
+        {loading && <div style={{textAlign:'center',padding:60,color:'var(--muted)'}}>Söker...</div>}
+        {!loading && query && companies.length === 0 && <div style={{textAlign:'center',padding:60,color:'var(--muted)'}}>Inga resultat för "{query}"</div>}
+        {!loading && companies.length > 0 && (
           <>
-            {companies.length === 0 && !loading && query && (
-              <div style={{textAlign:'center',padding:60,color:'var(--muted)'}}>Inga resultat för "{query}"</div>
-            )}
-            {companies.length === 0 && !loading && !query && (
-              <div style={{textAlign:'center',padding:60,color:'var(--muted)'}}>Börja söka för att hitta företag</div>
-            )}
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))',gap:16}}>
               {companies.map(c => (
                 <Link key={c.kundid} href={`/admin?id=${c.kundid}`} style={{textDecoration:'none'}}>
@@ -106,19 +98,18 @@ export default function HomePage() {
                       {c.branschid && <span style={{fontSize:12,background:'var(--accent-light)',border:'1px solid #bfdbfe',borderRadius:6,padding:'2px 8px',color:'var(--accent)'}}>SNI {c.branschid}</span>}
                       {c.webb && <span style={{fontSize:12,background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:6,padding:'2px 8px',color:'#15803d'}}>Webb</span>}
                     </div>
+                    {c.infotext && <p style={{marginTop:10,fontSize:13,color:'var(--muted)',lineHeight:1.5,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical'}}>{c.infotext}</p>}
                   </div>
                 </Link>
               ))}
             </div>
-            {companies.length > 0 && (
-              <div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:12,marginTop:32}}>
-                <button onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={page===0}
-                  style={{padding:'8px 20px',borderRadius:8,border:'1px solid var(--border)',background:'var(--surface)',cursor:page===0?'not-allowed':'pointer',fontSize:14,fontFamily:'inherit',opacity:page===0?0.5:1}}>← Föregående</button>
-                <span style={{color:'var(--muted)',fontSize:14}}>Sida {page+1}</span>
-                <button onClick={()=>setPage(p=>p+1)} disabled={!hasMore}
-                  style={{padding:'8px 20px',borderRadius:8,border:'1px solid var(--border)',background:'var(--surface)',cursor:!hasMore?'not-allowed':'pointer',fontSize:14,fontFamily:'inherit',opacity:!hasMore?0.5:1}}>Nästa →</button>
-              </div>
-            )}
+            <div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:12,marginTop:32}}>
+              <button onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={page===0}
+                style={{padding:'8px 20px',borderRadius:8,border:'1px solid var(--border)',background:'var(--surface)',cursor:page===0?'not-allowed':'pointer',fontSize:14,fontFamily:'inherit',opacity:page===0?0.5:1}}>← Föregående</button>
+              <span style={{color:'var(--muted)',fontSize:14}}>Sida {page+1}</span>
+              <button onClick={()=>setPage(p=>p+1)} disabled={!hasMore}
+                style={{padding:'8px 20px',borderRadius:8,border:'1px solid var(--border)',background:'var(--surface)',cursor:!hasMore?'not-allowed':'pointer',fontSize:14,fontFamily:'inherit',opacity:!hasMore?0.5:1}}>Nästa →</button>
+            </div>
           </>
         )}
       </div>
