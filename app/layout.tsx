@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-export const metadata: Metadata = { title: 'Regionsdelen — Företagskatalog', description: 'Sök bland Sveriges företag' }
+export const metadata: Metadata = { metadataBase: new URL('https://regionsdelen.se'), title: 'Regionsdelen — Företagskatalog', description: 'Sök bland Sveriges företag' }
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="sv">
